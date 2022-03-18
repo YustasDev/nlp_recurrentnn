@@ -56,7 +56,21 @@ def predict_review(model, new_sentences, maxlen=max_length, show_padded_sequence
         print(forecasts[x])
         print("\n")
 
+def fit_model_now (model, sentences) :
+  model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['accuracy'])
+  model.summary()
+  history = model.fit(training_sequences, training_labels_final, epochs=num_epochs,
+                      validation_data=(testing_sequences, testing_labels_final))
+  return history
 
+def plot_results (history):
+  plot_graphs(history, "accuracy")
+  plot_graphs(history, "loss")
+
+def fit_model_and_show_results (model, sentences):
+  history = fit_model_now(model, sentences)
+  plot_results(history)
+  predict_review(model, sentences)
 
 
 
@@ -165,6 +179,20 @@ if __name__ == '__main__':
     plot_graphs(history, "loss")
 
     predict_review(model1, recognition_phrases)
+
+#========================== Create a new model that uses a bidirectional LSTM ===================>
+
+    # Define the model
+    model_bidi_lstm = tf.keras.Sequential([
+        tf.keras.layers.Embedding(vocab_size, embedding_dim, input_length=max_length),
+        tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(embedding_dim)),
+        tf.keras.layers.Dense(6, activation='relu'),
+        tf.keras.layers.Dense(1, activation='sigmoid')
+    ])
+
+    # Compile and train the model and then show the predictions for our extra sentences
+    fit_model_and_show_results(model_bidi_lstm, recognition_phrases)
+
 
 
 
