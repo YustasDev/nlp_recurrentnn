@@ -12,12 +12,10 @@ from tensorboard.plugins import projector
 import tensorflow_datasets as tfds
 
 vocab_size = 1000
-max_length = 50
+max_length = 100
 trunc_type = 'post'
 padding_type = 'post'
 embedding_dim = 16
-
-import matplotlib.pyplot as plt
 
 
 def plot_graphs(history, string):
@@ -27,6 +25,42 @@ def plot_graphs(history, string):
     plt.ylabel(string)
     plt.legend([string, 'val_' + string])
     plt.show()
+
+# Define a function to take a series of reviews
+# and predict whether each one is a positive or negative review
+def predict_review(model, new_sentences, maxlen=max_length, show_padded_sequence=True):
+    # Keep the original sentences so that we can keep using them later
+    # Create an array to hold the encoded sequences
+    new_sequences = []
+
+    # Convert the new reviews to sequences
+    for i, frvw in enumerate(new_sentences):
+        new_sequences.append(tokenizer.encode(frvw))
+
+    # Pad all sequences for the new reviews
+    new_reviews_padded = pad_sequences(new_sequences, maxlen=max_length,
+                                       padding=padding_type, truncating=trunc_type)
+
+    forecasts = model.predict(new_reviews_padded)
+
+    # The closer the class is to 1, the more positive the review is
+    for x in range(len(new_sentences)):
+
+        # We can see the padded sequence if desired
+        # Print the sequence
+        if (show_padded_sequence):
+            print(new_reviews_padded[x])
+        # Print the review as text
+        print(new_sentences[x])
+        # Print its predicted class
+        print(forecasts[x])
+        print("\n")
+
+
+
+
+
+
 
 
 
@@ -113,24 +147,24 @@ if __name__ == '__main__':
     testing_labels_final = np.array(testing_labels)
 
     # Create and train the model
-    model = tf.keras.Sequential([
+    model1 = tf.keras.Sequential([
         tf.keras.layers.Embedding(vocab_size, embedding_dim, input_length=max_length),
         tf.keras.layers.GlobalAveragePooling1D(),
         tf.keras.layers.Dense(6, activation='relu'),
         tf.keras.layers.Dense(1, activation='sigmoid')
     ])
 
-    model.summary()
+    model1.summary()
 
     num_epochs = 30
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-    history = model.fit(training_sequences, training_labels_final, epochs=num_epochs,
+    model1.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    history = model1.fit(training_sequences, training_labels_final, epochs=num_epochs,
                         validation_data=(testing_sequences, testing_labels_final))
 
     plot_graphs(history, "accuracy")
     plot_graphs(history, "loss")
 
-
+    predict_review(model1, recognition_phrases)
 
 
 
