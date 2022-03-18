@@ -16,6 +16,7 @@ max_length = 100
 trunc_type = 'post'
 padding_type = 'post'
 embedding_dim = 16
+num_epochs = 200
 
 
 def plot_graphs(history, string):
@@ -160,6 +161,7 @@ if __name__ == '__main__':
     training_labels_final = np.array(training_labels)
     testing_labels_final = np.array(testing_labels)
 
+    """
     # Create and train the model
     model1 = tf.keras.Sequential([
         tf.keras.layers.Embedding(vocab_size, embedding_dim, input_length=max_length),
@@ -170,7 +172,6 @@ if __name__ == '__main__':
 
     model1.summary()
 
-    num_epochs = 30
     model1.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
     history = model1.fit(training_sequences, training_labels_final, epochs=num_epochs,
                         validation_data=(testing_sequences, testing_labels_final))
@@ -192,17 +193,62 @@ if __name__ == '__main__':
 
     # Compile and train the model and then show the predictions for our extra sentences
     fit_model_and_show_results(model_bidi_lstm, recognition_phrases)
+    
+    """
+
+#============================ N- bidirectional LSTM LAYERS=============================>
+    early_stopping = keras.callbacks.EarlyStopping(patience=10)
+    lr_schedule = keras.callbacks.LearningRateScheduler(
+        lambda epoch: (2e-4) / 2 ** (epoch / 200))
+    model_checkpoint = keras.callbacks.ModelCheckpoint(
+        "LSTM2_model.h5", save_best_only=True)
+
+    model_multiple_bidi_lstm = tf.keras.Sequential([
+        tf.keras.layers.Embedding(vocab_size, embedding_dim, input_length=max_length),
+        tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(embedding_dim,
+                                                           return_sequences=True)),
+        tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(embedding_dim)),
+        #tf.keras.layers.Dropout(.3),
+        tf.keras.layers.Dense(12, activation='relu'),
+        tf.keras.layers.Dropout(.4),
+        tf.keras.layers.Dense(1, activation='sigmoid')
+    ])
+
+    model_multiple_bidi_lstm.compile(loss='mean_absolute_error', optimizer='adam', metrics=['accuracy'])
+    history = model_multiple_bidi_lstm.fit(training_sequences, training_labels_final, epochs=num_epochs,
+                         validation_data=(testing_sequences, testing_labels_final),
+                         callbacks = [early_stopping, lr_schedule, model_checkpoint])
+
+    plot_graphs(history, "accuracy")
+    plot_graphs(history, "loss")
+
+    model = keras.models.load_model("LSTM2_model.h5")
+    predict_review(model, recognition_phrases)
 
 
 
+    #fit_model_and_show_results(model_multiple_bidi_lstm, recognition_phrases)
 
-
-
-
-
-
-
-
+#==================== try other sentences =================================>
+    #
+    # my_reviews =["lovely", "dreadful", "stay away",
+    #              "everything was hot exactly as I wanted",
+    #              "everything was not exactly as I wanted",
+    #              "they gave us free chocolate cake",
+    #              "I've never eaten anything so spicy in my life, my throat burned for hours",
+    #              "for a phone that is as expensive as this one I expect it to be much easier to use than this thing is",
+    #              "we left there very full for a low price so I'd say you just can't go wrong at this place",
+    #              "that place does not have quality meals and it isn't a good place to go for dinner",
+    #              ]
+    #
+    # print("===================================\n", "Embeddings only:\n", "===================================", )
+    # predict_review(model1, my_reviews, show_padded_sequence=False)
+    #
+    # print("===================================\n", "With a single bidirectional LSTM:\n", "===================================")
+    # predict_review(model_bidi_lstm, my_reviews, show_padded_sequence=False)
+    #
+    # print("===================================\n", "With two bidirectional LSTMs:\n",  "===================================")
+    # predict_review(model_multiple_bidi_lstm, my_reviews, show_padded_sequence=False)
 
 
 
