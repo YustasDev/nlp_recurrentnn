@@ -1,8 +1,16 @@
 # NLP_RecurrentNN
 
+## Getting started 
+**It's important!**
+
+ **The neural network has been trained on the dataset "reviews.csv" (look in the repository)which is the supplemented dataset from https://drive.google.com/uc?id=13ySLC_ue6Umt9RJYSeM2t-V0kCv-4C-P.
+
+The program finishes by saving the trained model in a *.h5 file; you can view the structure of the model with https://netron.app/. **
 
 
-## Getting started
+
+
+
 
 To make it easy for you to get started with GitLab, here's a list of recommended next steps.
 
