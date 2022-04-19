@@ -11,12 +11,12 @@ import io
 from tensorboard.plugins import projector
 import tensorflow_datasets as tfds
 
-vocab_size = 1000
+vocab_size = 1500
 max_length = 100
 trunc_type = 'post'
 padding_type = 'post'
 embedding_dim = 16
-num_epochs = 200
+num_epochs = 30
 
 
 def plot_graphs(history, string):
@@ -148,7 +148,7 @@ if __name__ == '__main__':
     # Pad all sequences
     sequences_padded = pad_sequences(sentences, maxlen=max_length,
                                      padding=padding_type, truncating=trunc_type)
-
+    print(sequences_padded[5])
     # Separate out the sentences and labels into training and test sets
     training_size = int(len(sentences) * 0.8)
 
@@ -161,7 +161,7 @@ if __name__ == '__main__':
     training_labels_final = np.array(training_labels)
     testing_labels_final = np.array(testing_labels)
 
-    """
+
     # Create and train the model
     model1 = tf.keras.Sequential([
         tf.keras.layers.Embedding(vocab_size, embedding_dim, input_length=max_length),
@@ -180,7 +180,9 @@ if __name__ == '__main__':
     plot_graphs(history, "loss")
 
     predict_review(model1, recognition_phrases)
+    model1.save('simpleDenseModel.h5', save_format='h5')
 
+    """
 #========================== Create a new model that uses a bidirectional LSTM ===================>
 
     # Define the model
@@ -194,7 +196,7 @@ if __name__ == '__main__':
     # Compile and train the model and then show the predictions for our extra sentences
     fit_model_and_show_results(model_bidi_lstm, recognition_phrases)
     
-    """
+    
 
 #============================ N- bidirectional LSTM LAYERS=============================>
     early_stopping = keras.callbacks.EarlyStopping(patience=10)
@@ -228,7 +230,7 @@ if __name__ == '__main__':
 
 
     #fit_model_and_show_results(model_multiple_bidi_lstm, recognition_phrases)
-
+    """
 #==================== try other sentences =================================>
     #
     # my_reviews =["lovely", "dreadful", "stay away",
