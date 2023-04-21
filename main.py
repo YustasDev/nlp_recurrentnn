@@ -75,10 +75,6 @@ def fit_model_and_show_results (model, sentences):
 
 
 
-
-
-
-
 if __name__ == '__main__':
 
     recognition_phrases = [
